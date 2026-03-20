@@ -1,534 +1,424 @@
 /**
- * TrafficAI - Live Map JavaScript
- * Canvas-based traffic visualization map with incident pins
- * In production: Google Maps Platform with Traffic Layer
+ * TrafficAI – Google Maps Integration
+ * Real Google Maps JavaScript API with incident markers, info windows,
+ * severity-based custom pins, traffic layer, and geolocation.
+ *
+ * Replace YOUR_GOOGLE_MAPS_API_KEY in map.html with your actual API key.
  */
 
 'use strict';
 
-/* =============================================
-   MAP STATE
-   ============================================= */
-const MapState = {
-  zoom: 1.0,
-  offsetX: 0,
-  offsetY: 0,
-  isDragging: false,
-  lastX: 0,
-  lastY: 0,
-  selectedIncident: null,
-  incidents: [],
-  filteredIncidents: [],
-  filterSeverity: 'all',
-  filterType: 'all',
-  animFrame: null,
-  pulsePhase: 0
+/* ── Global map state ───────────────────────────────────────────────────── */
+let gmap              = null;   // Google Map instance
+let markers           = [];     // Array of { marker, infoWindow, incident }
+let trafficLayer      = null;
+let heatmapLayer      = null;
+let currentFilter     = { severity: 'all', type: 'all' };
+let userLocationMarker = null;
+
+/* ── Severity → visual config ────────────────────────────────────────────── */
+const SEVERITY_CONFIG = {
+  critical: { color: '#FF1744', glyph: '🚨', zIndex: 100, scale: 1.4 },
+  high:     { color: '#FF6B35', glyph: '⚠️',  zIndex: 80,  scale: 1.2 },
+  medium:   { color: '#FFA726', glyph: '🔶', zIndex: 60,  scale: 1.0 },
+  low:      { color: '#00C853', glyph: '🔹', zIndex: 40,  scale: 0.9 }
 };
 
+const TYPE_ICONS = {
+  accident:         '💥',
+  congestion:       '🚦',
+  emergency:        '🚑',
+  hazard:           '⚠️',
+  stalled_vehicle:  '🚗',
+  weather:          '🌧️',
+  unknown:          '📍'
+};
 
-/* =============================================
-   FAKE "MAP" RENDERER (Canvas)
-   Replaces with Google Maps if API key available
-   ============================================= */
-const MapRenderer = {
-  canvas: null,
-  ctx: null,
-  width: 0,
-  height: 0,
-
-  init(canvasId) {
-    this.canvas = document.getElementById(canvasId);
-    if (!this.canvas) return;
-    this.ctx = this.canvas.getContext('2d');
-    this.resize();
-    window.addEventListener('resize', () => this.resize());
-    this.setupInteraction();
-    this.render();
+/* ── Demo incident data (replaces with Firestore in production) ────────────── */
+const DEMO_INCIDENTS = [
+  {
+    id: 'INC-001', type: 'accident', severity: 'critical',
+    title: 'Multi-vehicle collision – Highway 101',
+    description: 'Severe 3-car accident blocking 2 lanes. Ambulance dispatched. EV detected at scene.',
+    lat: 37.7749, lng: -122.4194,  // San Francisco
+    confidence: 0.96, status: 'active', time: '2 min ago', actions: ['Signal adjusted', 'Reroute active', 'Authorities alerted']
   },
-
-  resize() {
-    const container = this.canvas.parentElement;
-    this.canvas.width = container.clientWidth;
-    this.canvas.height = container.clientHeight;
-    this.width = this.canvas.width;
-    this.height = this.canvas.height;
+  {
+    id: 'INC-002', type: 'congestion', severity: 'high',
+    title: 'Heavy congestion – Bay Bridge approach',
+    description: 'Traffic backed up 2.3km. Estimated 34 min delay.',
+    lat: 37.7983, lng: -122.3778,
+    confidence: 0.88, status: 'active', time: '8 min ago', actions: ['Reroute suggested via I-80']
   },
-
-  // Convert lat/lng to canvas coords (approximation for SF area)
-  latLngToCanvas(lat, lng) {
-    // SF bounding box approx: lat 37.7-37.82, lng -122.35 to -122.52
-    const centerLat = 37.77;
-    const centerLng = -122.43;
-    const scale = 1800;
-
-    const x = this.width / 2 + (lng - centerLng) * scale * this.width / 800 * this.zoom + MapState.offsetX;
-    const y = this.height / 2 - (lat - centerLat) * scale * this.height / 600 * this.zoom + MapState.offsetY;
-    return { x, y };
+  {
+    id: 'INC-003', type: 'hazard', severity: 'medium',
+    title: 'Road debris – Market Street',
+    description: 'Large debris blocking right lane. Works crew en route.',
+    lat: 37.7792, lng: -122.4181,
+    confidence: 0.74, status: 'monitoring', time: '15 min ago', actions: ['Maintenance alerted']
   },
-
-  drawBackground() {
-    const ctx = this.ctx;
-    // Dark map background
-    ctx.fillStyle = '#0a1422';
-    ctx.fillRect(0, 0, this.width, this.height);
-
-    // Grid lines (streets simulation)
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-    ctx.lineWidth = 1;
-
-    const cols = 20;
-    const rows = 15;
-    const colW = this.width / cols;
-    const rowH = this.height / rows;
-
-    for (let i = 0; i <= cols; i++) {
-      const x = i * colW + MapState.offsetX * 0.1;
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, this.height);
-      ctx.stroke();
-    }
-    for (let j = 0; j <= rows; j++) {
-      const y = j * rowH + MapState.offsetY * 0.1;
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(this.width, y);
-      ctx.stroke();
-    }
-
-    // Major roads
-    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-    ctx.lineWidth = 3;
-    const roadPaths = [
-      [[0, this.height * 0.42], [this.width, this.height * 0.42]],
-      [[0, this.height * 0.62], [this.width, this.height * 0.62]],
-      [[this.width * 0.3, 0], [this.width * 0.3, this.height]],
-      [[this.width * 0.65, 0], [this.width * 0.65, this.height]],
-      [[0, this.height * 0.25], [this.width * 0.5, this.height * 0.55]],
-      [[this.width * 0.4, 0], [this.width, this.height * 0.7]]
-    ];
-    roadPaths.forEach(([start, end]) => {
-      ctx.beginPath();
-      ctx.moveTo(start[0] + MapState.offsetX * 0.05, start[1] + MapState.offsetY * 0.05);
-      ctx.lineTo(end[0] + MapState.offsetX * 0.05, end[1] + MapState.offsetY * 0.05);
-      ctx.stroke();
-    });
-
-    // Traffic flow lines (animated)
-    ctx.strokeStyle = 'rgba(0, 212, 255, 0.15)';
-    ctx.lineWidth = 2;
-    const t = Date.now() / 2000;
-    for (let i = 0; i < 5; i++) {
-      const y = (this.height * (0.3 + i * 0.1) + Math.sin(t + i) * 5 + MapState.offsetY * 0.05);
-      ctx.beginPath();
-      ctx.setLineDash([15, 25]);
-      ctx.lineDashOffset = -((Date.now() / 100 + i * 50) % 40);
-      ctx.moveTo(0, y);
-      ctx.lineTo(this.width, y);
-      ctx.stroke();
-    }
-    ctx.setLineDash([]);
-
-    // City area overlay (greenish)
-    const gradient = ctx.createRadialGradient(
-      this.width * 0.45, this.height * 0.5, 20,
-      this.width * 0.45, this.height * 0.5, this.width * 0.42
-    );
-    gradient.addColorStop(0, 'rgba(0, 50, 30, 0.08)');
-    gradient.addColorStop(1, 'transparent');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, this.width, this.height);
+  {
+    id: 'INC-004', type: 'emergency', severity: 'critical',
+    title: 'Emergency vehicle response – UCSF',
+    description: 'Ambulance corridor activated. Signal preemption on Medical Center Drive.',
+    lat: 37.7631, lng: -122.4580,
+    confidence: 0.99, status: 'active', time: '5 min ago', actions: ['EV corridor active', 'All signals preempted']
   },
-
-  drawIncidentPin(incident) {
-    const ctx = this.ctx;
-    const pos = this.latLngToCanvas(incident.coordinates.lat, incident.coordinates.lng);
-    const color = window.TrafficAI.getSeverityColor(incident.severity);
-    const isSelected = MapState.selectedIncident?.id === incident.id;
-    const pulse = (Math.sin(MapState.pulsePhase + Math.random() * 0.5) + 1) / 2;
-    const radius = isSelected ? 14 : 10;
-
-    // Pulse ring
-    if (incident.severity === 'critical' || incident.status === 'active') {
-      const ringRadius = radius + 8 + pulse * 12;
-      ctx.beginPath();
-      ctx.arc(pos.x, pos.y, ringRadius, 0, Math.PI * 2);
-      ctx.fillStyle = `${color}${Math.floor(20 * (1 - pulse)).toString(16).padStart(2, '0')}`;
-      ctx.fill();
-    }
-
-    // Outer circle
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, radius + 3, 0, Math.PI * 2);
-    ctx.fillStyle = `${color}33`;
-    ctx.fill();
-
-    // Main dot
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
-    const pinGrad = ctx.createRadialGradient(pos.x - 2, pos.y - 2, 0, pos.x, pos.y, radius);
-    pinGrad.addColorStop(0, color);
-    pinGrad.addColorStop(1, `${color}88`);
-    ctx.fillStyle = pinGrad;
-    ctx.fill();
-
-    // Glow
-    ctx.shadowColor = color;
-    ctx.shadowBlur = isSelected ? 20 : 10;
-    ctx.fill();
-    ctx.shadowBlur = 0;
-
-    // Icon
-    ctx.fillStyle = 'white';
-    ctx.font = `${radius - 2}px sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(window.TrafficAI.getTypeIcon(incident.type), pos.x, pos.y);
-
-    // Label on hover/select
-    if (isSelected) {
-      ctx.fillStyle = 'rgba(10, 22, 40, 0.9)';
-      const labelW = 140;
-      const labelH = 36;
-      const lx = pos.x - labelW / 2;
-      const ly = pos.y - radius - labelH - 8;
-      this.roundRect(ctx, lx, ly, labelW, labelH, 6);
-      ctx.fill();
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      ctx.fillStyle = 'white';
-      ctx.font = '11px Inter, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(incident.title.substring(0, 18) + '...', pos.x, ly + 14);
-      ctx.fillStyle = color;
-      ctx.font = 'bold 10px Inter, sans-serif';
-      ctx.fillText(incident.severity.toUpperCase(), pos.x, ly + 27);
-    }
-
-    // Store click target
-    incident._canvasPos = pos;
-    incident._canvasRadius = radius + 5;
+  {
+    id: 'INC-005', type: 'accident', severity: 'high',
+    title: 'Side-impact collision – Geary Blvd',
+    description: 'Two vehicles, possible injuries. Police responding.',
+    lat: 37.7827, lng: -122.4315,
+    confidence: 0.91, status: 'active', time: '11 min ago', actions: ['Police dispatched', 'Signal adjusted']
   },
-
-  drawReroutes() {
-    const ctx = this.ctx;
-    const t = Date.now() / 3000;
-
-    // Draw 3 sample reroute paths
-    const routes = [
-      { from: { lat: 37.798, lng: -122.378 }, to: { lat: 37.780, lng: -122.450 }, via: { lat: 37.810, lng: -122.420 } },
-      { from: { lat: 37.784, lng: -122.408 }, to: { lat: 37.760, lng: -122.395 }, via: { lat: 37.770, lng: -122.425 } }
-    ];
-
-    routes.forEach((route, idx) => {
-      const from = this.latLngToCanvas(route.from.lat, route.from.lng);
-      const via = this.latLngToCanvas(route.via.lat, route.via.lng);
-      const to = this.latLngToCanvas(route.to.lat, route.to.lng);
-
-      ctx.beginPath();
-      ctx.moveTo(from.x, from.y);
-      ctx.quadraticCurveTo(via.x, via.y, to.x, to.y);
-      ctx.strokeStyle = '#7c3aed44';
-      ctx.lineWidth = 3;
-      ctx.setLineDash([8, 12]);
-      ctx.lineDashOffset = -(t * 50 + idx * 30);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // Arrow at end
-      ctx.fillStyle = '#7c3aed';
-      ctx.font = '14px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('→', to.x, to.y);
-    });
+  {
+    id: 'INC-006', type: 'congestion', severity: 'low',
+    title: 'Minor slowdown – Castro District',
+    description: 'Light congestion due to pedestrian events. Clearing shortly.',
+    lat: 37.7609, lng: -122.4350,
+    confidence: 0.65, status: 'monitoring', time: '20 min ago', actions: ['Monitoring']
   },
-
-  roundRect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
-    ctx.lineTo(x + r, y + h);
-    ctx.arcTo(x, y + h, x, y + h - r, r);
-    ctx.lineTo(x, y + r);
-    ctx.arcTo(x, y, x + r, y, r);
-    ctx.closePath();
-  },
-
-  setupInteraction() {
-    const canvas = this.canvas;
-
-    canvas.addEventListener('click', (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
-
-      // Check incident hits
-      let hit = null;
-      for (const inc of MapState.filteredIncidents) {
-        if (!inc._canvasPos) continue;
-        const dx = mx - inc._canvasPos.x;
-        const dy = my - inc._canvasPos.y;
-        if (Math.sqrt(dx * dx + dy * dy) < (inc._canvasRadius || 15)) {
-          hit = inc;
-          break;
-        }
-      }
-
-      if (hit) {
-        MapState.selectedIncident = hit;
-        showIncidentPopup(hit);
-        selectIncidentInList(hit.id);
-      } else {
-        MapState.selectedIncident = null;
-        const popup = document.getElementById('incidentPopup');
-        if (popup) popup.hidden = true;
-      }
-    });
-
-    // Pan support
-    canvas.addEventListener('mousedown', (e) => {
-      MapState.isDragging = true;
-      MapState.lastX = e.clientX;
-      MapState.lastY = e.clientY;
-    });
-    canvas.addEventListener('mousemove', (e) => {
-      if (!MapState.isDragging) return;
-      MapState.offsetX += e.clientX - MapState.lastX;
-      MapState.offsetY += e.clientY - MapState.lastY;
-      MapState.lastX = e.clientX;
-      MapState.lastY = e.clientY;
-    });
-    canvas.addEventListener('mouseup', () => MapState.isDragging = false);
-    canvas.addEventListener('mouseleave', () => MapState.isDragging = false);
-  },
-
-  render() {
-    MapState.pulsePhase += 0.04;
-    const ctx = this.ctx;
-    ctx.clearRect(0, 0, this.width, this.height);
-    this.drawBackground();
-    this.drawReroutes();
-
-    MapState.filteredIncidents.forEach(inc => this.drawIncidentPin(inc));
-
-    MapState.animFrame = requestAnimationFrame(() => this.render());
+  {
+    id: 'INC-007', type: 'stalled_vehicle', severity: 'medium',
+    title: 'Stalled vehicle – Golden Gate Bridge approach',
+    description: 'Stalled truck on right shoulder. CHP responding.',
+    lat: 37.8077, lng: -122.4750,
+    confidence: 0.81, status: 'active', time: '7 min ago', actions: ['CHP notified']
   }
+];
+
+/* ── Initialize Google Map ─────────────────────────────────────────────── */
+window.initTrafficMap = async function () {
+  const { Map, TrafficLayer } = await google.maps.importLibrary('maps');
+  const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary('marker');
+
+  const mapEl = document.getElementById('mapContainer');
+
+  gmap = new Map(mapEl, {
+    center: { lat: 37.7749, lng: -122.4194 }, // San Francisco
+    zoom: 13,
+    mapId: 'trafficai_map',
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: false,
+    zoomControl: false,            // we use custom controls
+    gestureHandling: 'greedy',
+    styles: DARK_MAP_STYLES        // Custom dark theme
+  });
+
+  // Live traffic layer from Google
+  trafficLayer = new TrafficLayer();
+  trafficLayer.setMap(gmap);
+
+  // Remove the old canvas element if present
+  const canvas = document.getElementById('mapCanvas');
+  if (canvas) canvas.remove();
+
+  // Render incidents
+  renderIncidentMarkers({ Map, AdvancedMarkerElement, PinElement });
+  renderIncidentList(DEMO_INCIDENTS);
+
+  // Wire up controls
+  initMapControls();
+  initFilters();
+  initGeolocation();
+  startLiveRefresh();
 };
 
+/* ── Create custom styled markers ─────────────────────────────────────────── */
+function renderIncidentMarkers({ AdvancedMarkerElement, PinElement }) {
+  // Clear old markers
+  markers.forEach(m => m.marker.map = null);
+  markers = [];
 
-/* =============================================
-   INCIDENT LIST (Sidebar)
-   ============================================= */
-function renderIncidentList() {
+  const filtered = DEMO_INCIDENTS.filter(inc =>
+    (currentFilter.severity === 'all' || inc.severity === currentFilter.severity) &&
+    (currentFilter.type === 'all' || inc.type === currentFilter.type)
+  );
+
+  filtered.forEach(incident => {
+    const cfg = SEVERITY_CONFIG[incident.severity] || SEVERITY_CONFIG.low;
+
+    // Build pin element
+    const pin = new PinElement({
+      background:  cfg.color,
+      borderColor: '#fff',
+      glyphColor:  '#fff',
+      glyph:       TYPE_ICONS[incident.type] || '📍',
+      scale:       cfg.scale
+    });
+
+    const marker = new AdvancedMarkerElement({
+      map:      gmap,
+      position: { lat: incident.lat, lng: incident.lng },
+      title:    incident.title,
+      content:  pin.element,
+      zIndex:   cfg.zIndex
+    });
+
+    // Info window content
+    const infoContent = buildInfoWindowContent(incident);
+    const infoWindow = new google.maps.InfoWindow({
+      content:     infoContent,
+      maxWidth:    320,
+      ariaLabel:   incident.title
+    });
+
+    marker.addListener('click', () => {
+      // Close all other info windows first
+      markers.forEach(m => m.infoWindow.close());
+      infoWindow.open({ map: gmap, anchor: marker });
+      highlightListItem(incident.id);
+    });
+
+    // Animate in
+    marker.content.style.opacity = '0';
+    marker.content.style.transform = 'translateY(-20px)';
+    setTimeout(() => {
+      marker.content.style.transition = 'all 0.4s ease';
+      marker.content.style.opacity = '1';
+      marker.content.style.transform = 'translateY(0)';
+    }, Math.random() * 600);
+
+    markers.push({ marker, infoWindow, incident });
+  });
+}
+
+/* ── Info window HTML ────────────────────────────────────────────────────── */
+function buildInfoWindowContent(incident) {
+  const cfg = SEVERITY_CONFIG[incident.severity] || SEVERITY_CONFIG.low;
+  return `
+    <div style="font-family:'Inter',sans-serif;padding:8px;max-width:300px;color:#1e293b">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:1.2rem">${TYPE_ICONS[incident.type] || '📍'}</span>
+        <span style="background:${cfg.color};color:#fff;padding:2px 8px;border-radius:12px;font-size:0.7rem;font-weight:700;text-transform:uppercase">${incident.severity}</span>
+        <span style="color:#64748b;font-size:0.75rem">${incident.time}</span>
+      </div>
+      <h3 style="margin:0 0 6px;font-size:0.9rem;font-weight:700;line-height:1.3">${incident.title}</h3>
+      <p style="margin:0 0 8px;font-size:0.8rem;color:#475569;line-height:1.4">${incident.description}</p>
+      <div style="margin:0 0 8px">
+        <div style="font-size:0.75rem;color:#64748b;margin-bottom:3px">AI Confidence</div>
+        <div style="background:#e2e8f0;border-radius:8px;height:6px;overflow:hidden">
+          <div style="background:${cfg.color};width:${Math.round(incident.confidence * 100)}%;height:100%;border-radius:8px"></div>
+        </div>
+        <div style="font-size:0.7rem;color:#475569;margin-top:2px">${Math.round(incident.confidence * 100)}%</div>
+      </div>
+      ${incident.actions.map(a =>
+        `<span style="display:inline-block;background:#f1f5f9;color:#334155;padding:2px 8px;border-radius:10px;font-size:0.7rem;margin:2px 2px 0 0">✓ ${a}</span>`
+      ).join('')}
+      <div style="margin-top:10px;padding-top:8px;border-top:1px solid #e2e8f0">
+        <span style="font-size:0.7rem;color:#94a3b8">ID: ${incident.id}</span>
+        <span style="float:right;font-size:0.7rem;background:${incident.status === 'active' ? '#dcfce7' : '#fef9c3'};color:${incident.status === 'active' ? '#166534' : '#854d0e'};padding:1px 6px;border-radius:8px">${incident.status}</span>
+      </div>
+    </div>
+  `;
+}
+
+/* ── Incident Sidebar List ─────────────────────────────────────────────── */
+function renderIncidentList(incidents) {
   const list = document.getElementById('incidentList');
   if (!list) return;
 
-  list.innerHTML = '';
-  if (!MapState.filteredIncidents.length) {
-    list.innerHTML = '<div style="text-align:center;color:#475569;font-size:0.875rem;padding:2rem">No matching incidents</div>';
-    return;
-  }
+  const filtered = incidents.filter(inc =>
+    (currentFilter.severity === 'all' || inc.severity === currentFilter.severity) &&
+    (currentFilter.type === 'all' || inc.type === currentFilter.type)
+  );
 
-  MapState.filteredIncidents.forEach((incident, i) => {
-    const item = document.createElement('div');
-    item.className = `map-incident-item ${incident.severity}`;
-    item.setAttribute('role', 'listitem');
-    item.setAttribute('tabindex', '0');
-    item.setAttribute('aria-label', `${incident.severity} severity: ${incident.title} at ${incident.location}`);
-    item.dataset.id = incident.id;
-    item.style.animationDelay = `${i * 0.05}s`;
-    item.style.opacity = '0';
-    item.style.animation = `fadeIn 0.3s ${i * 0.05}s ease both`;
+  document.getElementById('liveCount').textContent = `${filtered.length} Active Incidents`;
+  document.getElementById('totalCount').textContent = filtered.length;
+  document.getElementById('criticalCount').textContent = filtered.filter(i => i.severity === 'critical').length;
+  document.getElementById('resolvedCount').textContent = DEMO_INCIDENTS.filter(i => i.status === 'resolved').length;
 
-    item.innerHTML = `
-      <div class="map-incident-title">
-        <span>${incident.title}</span>
-        <span class="severity-badge ${incident.severity}">${incident.severity}</span>
-      </div>
-      <div class="map-incident-sub">
-        <span>${window.TrafficAI.getTypeIcon(incident.type)}</span>
-        <span>${incident.location}</span>
-        <span class="incident-time">· ${window.TrafficAI.formatTimeAgo(incident.reportedAt)}</span>
-      </div>
-    `;
+  list.innerHTML = filtered.length === 0
+    ? `<div style="text-align:center;padding:2rem;color:var(--text-muted)">No incidents match current filters</div>`
+    : filtered.map(inc => {
+        const cfg = SEVERITY_CONFIG[inc.severity] || SEVERITY_CONFIG.low;
+        return `
+          <div class="incident-item" role="listitem" data-id="${inc.id}"
+               tabindex="0" aria-label="${inc.title}, ${inc.severity} severity"
+               style="cursor:pointer">
+            <div class="incident-item-header">
+              <div class="incident-item-icon" style="background:${cfg.color}22;color:${cfg.color}">
+                ${TYPE_ICONS[inc.type] || '📍'}
+              </div>
+              <div class="incident-item-info">
+                <div class="incident-item-title">${inc.title}</div>
+                <div class="incident-item-meta">
+                  <span class="severity-badge severity-${inc.severity}">${inc.severity}</span>
+                  <span class="incident-item-time">${inc.time}</span>
+                </div>
+              </div>
+            </div>
+            <div class="incident-item-confidence">
+              <div class="confidence-bar">
+                <div class="confidence-fill" style="width:${Math.round(inc.confidence * 100)}%;background:${cfg.color}"></div>
+              </div>
+              <span class="confidence-label">${Math.round(inc.confidence * 100)}% confidence</span>
+            </div>
+          </div>
+        `;
+      }).join('');
 
-    item.addEventListener('click', () => {
-      MapState.selectedIncident = incident;
-      showIncidentPopup(incident);
-      selectIncidentInList(incident.id);
-    });
-    item.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') item.click();
-    });
-
-    list.appendChild(item);
-  });
-
-  // Update counts
-  const total = MapState.incidents.filter(i => i.status === 'active' || i.status === 'monitoring').length;
-  const critical = MapState.incidents.filter(i => i.severity === 'critical' && i.status === 'active').length;
-  const resolved = MapState.incidents.filter(i => i.status === 'resolved').length;
-
-  const el = (id) => document.getElementById(id);
-  if (el('totalCount')) el('totalCount').textContent = total;
-  if (el('criticalCount')) el('criticalCount').textContent = critical;
-  if (el('resolvedCount')) el('resolvedCount').textContent = resolved;
-  if (el('liveCount')) el('liveCount').textContent = `${MapState.filteredIncidents.length} incident${MapState.filteredIncidents.length !== 1 ? 's' : ''}`;
-}
-
-function selectIncidentInList(id) {
-  document.querySelectorAll('.map-incident-item').forEach(item => {
-    item.classList.toggle('selected', item.dataset.id === id);
+  // Click to pan map and open info window
+  list.querySelectorAll('.incident-item').forEach(el => {
+    const onClick = () => {
+      const id = el.dataset.id;
+      const found = markers.find(m => m.incident.id === id);
+      if (found) {
+        gmap.panTo(found.marker.position);
+        gmap.setZoom(15);
+        markers.forEach(m => m.infoWindow.close());
+        found.infoWindow.open({ map: gmap, anchor: found.marker });
+      }
+    };
+    el.addEventListener('click', onClick);
+    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') onClick(); });
   });
 }
 
-
-/* =============================================
-   INCIDENT POPUP
-   ============================================= */
-function showIncidentPopup(incident) {
-  const popup = document.getElementById('incidentPopup');
-  const content = document.getElementById('popupContent');
-  if (!popup || !content) return;
-
-  content.innerHTML = `
-    <div style="margin-bottom:0.75rem">
-      <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem">
-        <span>${window.TrafficAI.getTypeIcon(incident.type)}</span>
-        <span style="font-weight:700;font-size:0.9375rem">${incident.title}</span>
-        <span class="severity-badge ${incident.severity}">${incident.severity}</span>
-      </div>
-      <div style="font-size:0.75rem;color:#94a3b8">📍 ${incident.location}</div>
-    </div>
-    <p style="font-size:0.8125rem;color:#94a3b8;margin-bottom:0.75rem;line-height:1.6">${incident.description}</p>
-    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem">
-      <span class="tag">Confidence: ${Math.round(incident.confidence * 100)}%</span>
-      <span class="tag">${incident.status}</span>
-      <span class="tag">${window.TrafficAI.formatTimeAgo(incident.reportedAt)}</span>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:0.375rem">
-      ${(incident.actions || []).map(action => `
-        <div style="font-size:0.75rem;color:#64748b;padding:0.25rem 0;border-bottom:1px solid rgba(255,255,255,0.05)">
-          ✓ ${typeof action === 'string' ? action.replace(/_/g, ' ') : action.text || action}
-        </div>
-      `).join('')}
-    </div>
-  `;
-
-  popup.hidden = false;
-}
-
-
-/* =============================================
-   FILTERS
-   ============================================= */
-function initFilters() {
-  // Severity chips
-  document.querySelectorAll('.chip[data-filter]').forEach(chip => {
-    chip.addEventListener('click', () => {
-      document.querySelectorAll('.chip[data-filter]').forEach(c => {
-        c.classList.remove('active');
-        c.setAttribute('aria-pressed', 'false');
-      });
-      chip.classList.add('active');
-      chip.setAttribute('aria-pressed', 'true');
-      MapState.filterSeverity = chip.dataset.filter;
-      applyFilters();
-    });
-  });
-
-  // Type chips
-  document.querySelectorAll('.chip[data-type]').forEach(chip => {
-    chip.addEventListener('click', () => {
-      document.querySelectorAll('.chip[data-type]').forEach(c => {
-        c.classList.remove('active');
-        c.setAttribute('aria-pressed', 'false');
-      });
-      chip.classList.add('active');
-      chip.setAttribute('aria-pressed', 'true');
-      MapState.filterType = chip.dataset.type;
-      applyFilters();
-    });
+function highlightListItem(id) {
+  document.querySelectorAll('.incident-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.id === id);
   });
 }
 
-function applyFilters() {
-  MapState.filteredIncidents = window.TrafficAI.getIncidents({
-    severity: MapState.filterSeverity,
-    type: MapState.filterType
-  }).filter(i => i.status !== 'resolved' || MapState.filterSeverity !== 'all');
-  renderIncidentList();
-}
-
-
-/* =============================================
-   MAP CONTROLS
-   ============================================= */
+/* ── Custom map controls ─────────────────────────────────────────────────── */
 function initMapControls() {
-  document.getElementById('zoomIn')?.addEventListener('click', () => {
-    MapState.zoom = Math.min(MapState.zoom * 1.3, 5);
-  });
-  document.getElementById('zoomOut')?.addEventListener('click', () => {
-    MapState.zoom = Math.max(MapState.zoom / 1.3, 0.4);
-  });
-  document.getElementById('myLocation')?.addEventListener('click', () => {
-    MapState.offsetX = 0;
-    MapState.offsetY = 0;
-    MapState.zoom = 1;
-    Toast.show('Map Reset', 'Centered on current area', 'info', 2000);
-  });
+  document.getElementById('zoomIn')?.addEventListener('click', () => gmap.setZoom(gmap.getZoom() + 1));
+  document.getElementById('zoomOut')?.addEventListener('click', () => gmap.setZoom(gmap.getZoom() - 1));
   document.getElementById('refreshMap')?.addEventListener('click', () => {
-    loadIncidents();
-    Toast.show('Map Refreshed', 'Live data updated', 'success', 2000);
+    renderIncidentMarkers({ AdvancedMarkerElement: google.maps.marker.AdvancedMarkerElement,
+                            PinElement: google.maps.marker.PinElement });
+    renderIncidentList(DEMO_INCIDENTS);
+    if (window.Toast) Toast.show('Map Refreshed', 'Incident data updated', 'success', 2000);
   });
 
-  // Popup close
-  document.getElementById('popupClose')?.addEventListener('click', () => {
-    const popup = document.getElementById('incidentPopup');
-    if (popup) popup.hidden = true;
-    MapState.selectedIncident = null;
+  // Traffic layer toggle button (if exists)
+  const trafficToggle = document.getElementById('trafficToggle');
+  if (trafficToggle) {
+    let trafficOn = true;
+    trafficToggle.addEventListener('click', () => {
+      trafficOn = !trafficOn;
+      trafficLayer.setMap(trafficOn ? gmap : null);
+      trafficToggle.setAttribute('aria-pressed', String(trafficOn));
+      trafficToggle.title = trafficOn ? 'Hide traffic layer' : 'Show traffic layer';
+    });
+  }
+}
+
+/* ── Filters ─────────────────────────────────────────────────────────────── */
+function initFilters() {
+  document.querySelectorAll('[data-filter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-filter]').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-pressed', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
+      currentFilter.severity = btn.dataset.filter;
+      refreshMapData();
+    });
+  });
+
+  document.querySelectorAll('[data-type]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      document.querySelectorAll('[data-type]').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-pressed', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
+      currentFilter.type = btn.dataset.type;
+      refreshMapData();
+    });
   });
 }
 
-
-/* =============================================
-   LOAD DATA
-   ============================================= */
-function loadIncidents() {
-  MapState.incidents = window.TrafficAI.incidents;
-  MapState.filteredIncidents = MapState.incidents.filter(i => i.status !== 'resolved');
-  renderIncidentList();
+async function refreshMapData() {
+  const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary('marker');
+  renderIncidentMarkers({ AdvancedMarkerElement, PinElement });
+  renderIncidentList(DEMO_INCIDENTS);
 }
 
-
-/* =============================================
-   AUTO REFRESH
-   ============================================= */
-function startAutoRefresh() {
-  setInterval(() => {
-    // Simulate occasional new incident
-    if (Math.random() < 0.3) {
-      loadIncidents();
+/* ── Geolocation ─────────────────────────────────────────────────────────── */
+function initGeolocation() {
+  const btn = document.getElementById('myLocation');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      if (window.Toast) Toast.show('Not Available', 'Geolocation not supported by your browser', 'warning', 3000);
+      return;
     }
+    btn.setAttribute('aria-label', 'Locating...');
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        gmap.panTo(loc);
+        gmap.setZoom(14);
+        // Add user location marker
+        if (userLocationMarker) userLocationMarker.map = null;
+        const pulse = document.createElement('div');
+        pulse.style.cssText = `
+          width:20px;height:20px;border-radius:50%;
+          background:#4285F4;border:3px solid #fff;
+          box-shadow:0 0 0 0 #4285F4;
+          animation:pulse-blue 2s infinite;
+        `;
+        const style = document.createElement('style');
+        style.textContent = `@keyframes pulse-blue {
+          0%   { box-shadow: 0 0 0 0 rgba(66,133,244,0.6); }
+          70%  { box-shadow: 0 0 0 14px rgba(66,133,244,0); }
+          100% { box-shadow: 0 0 0 0 rgba(66,133,244,0); }
+        }`;
+        document.head.appendChild(style);
+
+        google.maps.importLibrary('marker').then(({ AdvancedMarkerElement }) => {
+          userLocationMarker = new AdvancedMarkerElement({
+            map: gmap, position: loc, content: pulse, title: 'You are here', zIndex: 200
+          });
+        });
+        btn.setAttribute('aria-label', 'Center map on my location');
+        if (window.Toast) Toast.show('Location Found', 'Map centered on your current position', 'success', 2000);
+      },
+      err => {
+        btn.setAttribute('aria-label', 'Center map on my location');
+        if (window.Toast) Toast.show('Location Error', err.message, 'error', 3000);
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  });
+}
+
+/* ── Live refresh simulation (polls every 30s in production → Firestore) ── */
+function startLiveRefresh() {
+  setInterval(() => {
+    const badge = document.getElementById('liveCount');
+    if (badge) {
+      badge.textContent = `${markers.length} Active Incidents · Updated just now`;
+    }
+    // In production: this would call firebase onSnapshot listener
   }, 30000);
 }
 
-
-/* =============================================
-   INIT
-   ============================================= */
-document.addEventListener('DOMContentLoaded', () => {
-  // Wait for TrafficAI to load
-  setTimeout(() => {
-    loadIncidents();
-    initFilters();
-    initMapControls();
-    MapRenderer.init('mapCanvas');
-    startAutoRefresh();
-  }, 100);
-});
+/* ── Dark map style ──────────────────────────────────────────────────────── */
+const DARK_MAP_STYLES = [
+  { elementType: 'geometry', stylers: [{ color: '#0f172a' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#0f172a' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#64748b' }] },
+  { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#94a3b8' }] },
+  { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#475569' }] },
+  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#0f2027' }] },
+  { featureType: 'poi.park', elementType: 'labels.text.fill', stylers: [{ color: '#1e3a5f' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1e293b' }] },
+  { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#334155' }] },
+  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#64748b' }] },
+  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#1e293b' }] },
+  { featureType: 'road.highway', elementType: 'geometry.stroke', stylers: [{ color: '#334155' }] },
+  { featureType: 'road.highway', elementType: 'labels.text.fill', stylers: [{ color: '#94a3b8' }] },
+  { featureType: 'transit', elementType: 'geometry', stylers: [{ color: '#0f172a' }] },
+  { featureType: 'transit.station', elementType: 'labels.text.fill', stylers: [{ color: '#475569' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0c1a2e' }] },
+  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#1e3a5f' }] },
+  { featureType: 'water', elementType: 'labels.text.stroke', stylers: [{ color: '#0c1a2e' }] }
+];

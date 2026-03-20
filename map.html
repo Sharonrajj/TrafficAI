@@ -149,6 +149,27 @@
   </main>
 
   <script src="js/main.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="js/map.js"></script>
+  <!--
+    ╔══════════════════════════════════════════════════════════════╗
+    ║  GOOGLE MAPS API KEY – Replace YOUR_API_KEY below           ║
+    ║  Steps to get your key:                                     ║
+    ║  1. Go to console.cloud.google.com                          ║
+    ║  2. APIs & Services → Credentials → Create API Key         ║
+    ║  3. Restrict to Maps JavaScript API + your domain          ║
+    ║  4. Paste the key below replacing YOUR_API_KEY             ║
+    ╚══════════════════════════════════════════════════════════════╝
+  -->
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initTrafficMap&libraries=maps,marker&v=beta"
+    async defer>
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+  </script>
 </body>
 </html>
