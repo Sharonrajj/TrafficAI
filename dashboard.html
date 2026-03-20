@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Authority dashboard — review high-severity alerts, manage incidents, coordinate emergency response." />
+  <title>Authority Dashboard – TrafficAI</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo" aria-label="TrafficAI Home">
+        <div class="logo-icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="15" stroke="url(#logoGradD)" stroke-width="2"/>
+            <path d="M8 22L16 8L24 22" stroke="url(#logoGradD)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="16" cy="19" r="2" fill="#00d4ff"/>
+            <defs><linearGradient id="logoGradD" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#00d4ff"/><stop offset="100%" stop-color="#ff6b35"/></linearGradient></defs>
+          </svg>
+        </div>
+        <span class="logo-text">Traffic<span class="logo-accent">AI</span></span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="navMenu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-menu" id="navMenu" role="list">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="report.html" class="nav-link">Report Incident</a></li>
+        <li><a href="map.html" class="nav-link">Live Map</a></li>
+        <li><a href="history.html" class="nav-link">History</a></li>
+        <li><a href="dashboard.html" class="nav-link nav-admin active" aria-current="page">Authority Dashboard</a></li>
+      </ul>
+      <div class="auth-badge" aria-label="Logged in as Authority User">
+        <div class="auth-avatar" aria-hidden="true">A</div>
+        <span>Authority Access</span>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main-content" class="dashboard-main">
+
+    <!-- Dashboard Header -->
+    <div class="dash-header">
+      <div class="dash-header-left">
+        <h1>Authority Dashboard</h1>
+        <div class="dash-live" aria-live="polite" aria-label="Live system status">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span>Live — Auto-refreshing every 15s</span>
+        </div>
+      </div>
+      <div class="dash-header-right">
+        <div class="dash-time" id="dashTime" aria-label="Current time" aria-live="polite"></div>
+        <button class="btn btn-primary" id="refreshDash" aria-label="Manually refresh dashboard">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Refresh
+        </button>
+      </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <section class="kpi-grid" aria-label="Key performance indicators">
+      <div class="kpi-card kpi-critical">
+        <div class="kpi-icon" aria-hidden="true">🚨</div>
+        <div class="kpi-content">
+          <span class="kpi-value" id="kpi-critical">3</span>
+          <span class="kpi-label">Critical Active</span>
+          <span class="kpi-delta up">↑ 1 in last hour</span>
+        </div>
+        <div class="kpi-sparkline" aria-hidden="true"></div>
+      </div>
+      <div class="kpi-card kpi-alerts">
+        <div class="kpi-icon" aria-hidden="true">📡</div>
+        <div class="kpi-content">
+          <span class="kpi-value" id="kpi-alerts">12</span>
+          <span class="kpi-label">Alerts Sent Today</span>
+          <span class="kpi-delta">→ On track</span>
+        </div>
+        <div class="kpi-sparkline" aria-hidden="true"></div>
+      </div>
+      <div class="kpi-card kpi-response">
+        <div class="kpi-icon" aria-hidden="true">⚡</div>
+        <div class="kpi-content">
+          <span class="kpi-value" id="kpi-response">4.2s</span>
+          <span class="kpi-label">Avg AI Response</span>
+          <span class="kpi-delta down">↓ Faster than yesterday</span>
+        </div>
+        <div class="kpi-sparkline" aria-hidden="true"></div>
+      </div>
+      <div class="kpi-card kpi-confidence">
+        <div class="kpi-icon" aria-hidden="true">🎯</div>
+        <div class="kpi-content">
+          <span class="kpi-value" id="kpi-confidence">94%</span>
+          <span class="kpi-label">AI Confidence Avg</span>
+          <span class="kpi-delta up">↑ 2% this week</span>
+        </div>
+        <div class="kpi-sparkline" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <div class="dash-body">
+
+      <!-- Priority Alerts Column -->
+      <section class="priority-alerts" aria-labelledby="alerts-heading">
+        <div class="section-title-row">
+          <h2 id="alerts-heading">Priority Alerts</h2>
+          <div class="alert-count-badge" id="alertBadge" aria-label="Number of active alerts">3 active</div>
+        </div>
+        <div class="alerts-feed" id="alertsFeed" role="list" aria-live="polite" aria-label="Priority alerts feed">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- Center: Activity + Chart -->
+      <section class="dash-center" aria-labelledby="activity-dash-heading">
+        <div class="section-title-row">
+          <h2 id="activity-dash-heading">Incident Activity (24h)</h2>
+          <div class="chart-legend" aria-hidden="true">
+            <span class="legend-item-sm"><span style="background:#00d4ff"></span>Reports</span>
+            <span class="legend-item-sm"><span style="background:#ff6b35"></span>Critical</span>
+          </div>
+        </div>
+        <div class="activity-chart" aria-label="Incident activity chart for last 24 hours">
+          <canvas id="activityChart" aria-label="Bar chart showing incident activity over the last 24 hours" role="img"></canvas>
+        </div>
+
+        <!-- Signal Control Panel -->
+        <div class="signal-control-panel" aria-labelledby="signal-heading">
+          <h3 id="signal-heading">Signal Adjustment Recommendations</h3>
+          <div class="signal-list" id="signalList" role="list" aria-label="Traffic signal recommendations">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Active Incidents + Reroutes -->
+      <section class="dash-right" aria-labelledby="active-heading">
+        <div class="section-title-row">
+          <h2 id="active-heading">Active Incidents</h2>
+          <a href="history.html" class="view-all-link" aria-label="View all incidents in history">View All</a>
+        </div>
+        <div class="active-incidents" id="activeIncidents" role="list" aria-live="polite" aria-label="Active incidents list">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Reroute Suggestions -->
+        <div class="reroute-panel" aria-labelledby="reroute-heading">
+          <h3 id="reroute-heading">Active Reroute Suggestions</h3>
+          <div class="reroute-list" id="rerouteList" role="list" aria-label="Active reroute suggestions">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Emergency Vehicle Panel -->
+        <div class="emergency-panel" aria-labelledby="emergency-heading">
+          <div class="emergency-header">
+            <h3 id="emergency-heading">
+              <span class="emergency-icon" aria-hidden="true">🚑</span>
+              Emergency Vehicle Priority
+            </h3>
+            <span class="emergency-badge" id="evBadge" aria-live="polite">2 active corridors</span>
+          </div>
+          <div class="ev-corridors" id="evCorridors" role="list" aria-label="Emergency vehicle corridors">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Audit Log -->
+    <section class="audit-log-section" aria-labelledby="audit-heading">
+      <div class="section-title-row">
+        <h2 id="audit-heading">Audit Log</h2>
+        <button class="btn btn-secondary" id="exportLog" aria-label="Export audit log as CSV">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Export CSV
+        </button>
+      </div>
+      <div class="audit-table-wrapper" role="region" aria-label="Audit log table" tabindex="0">
+        <table class="audit-table" aria-label="System audit log">
+          <thead>
+            <tr>
+              <th scope="col">Timestamp</th>
+              <th scope="col">Incident ID</th>
+              <th scope="col">Action</th>
+              <th scope="col">Actor</th>
+              <th scope="col">Severity</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody id="auditTableBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

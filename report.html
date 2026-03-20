@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Report a traffic incident with photos, videos, voice or text. AI-powered analysis provides immediate structured response." />
+  <title>Report Incident – TrafficAI</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/report.css" />
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Navigation -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo" aria-label="TrafficAI Home">
+        <div class="logo-icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="15" stroke="url(#logoGradR)" stroke-width="2"/>
+            <path d="M8 22L16 8L24 22" stroke="url(#logoGradR)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="16" cy="19" r="2" fill="#00d4ff"/>
+            <defs>
+              <linearGradient id="logoGradR" x1="0" y1="0" x2="32" y2="32">
+                <stop offset="0%" stop-color="#00d4ff"/>
+                <stop offset="100%" stop-color="#ff6b35"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="logo-text">Traffic<span class="logo-accent">AI</span></span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navMenu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-menu" id="navMenu" role="list">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="report.html" class="nav-link active" aria-current="page">Report Incident</a></li>
+        <li><a href="map.html" class="nav-link">Live Map</a></li>
+        <li><a href="history.html" class="nav-link">History</a></li>
+        <li><a href="dashboard.html" class="nav-link nav-admin">Authority Dashboard</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main id="main-content" class="report-main">
+    <div class="report-layout">
+
+      <!-- Left: Input Panel -->
+      <section class="input-panel" aria-labelledby="report-heading">
+        <div class="panel-header">
+          <h1 id="report-heading">Report an Incident</h1>
+          <p>Submit any format — our AI handles the rest</p>
+        </div>
+
+        <!-- Input Method Tabs -->
+        <div class="input-tabs" role="tablist" aria-label="Input method selection">
+          <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="uploadPanel" id="tab-upload" data-tab="upload">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Photo/Video
+          </button>
+          <button class="tab-btn" role="tab" aria-selected="false" aria-controls="voicePanel" id="tab-voice" data-tab="voice">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" stroke="currentColor" stroke-width="2"/>
+              <path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Voice
+          </button>
+          <button class="tab-btn" role="tab" aria-selected="false" aria-controls="textPanel" id="tab-text" data-tab="text">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+            Text Report
+          </button>
+        </div>
+
+        <!-- Upload Panel -->
+        <div id="uploadPanel" class="tab-panel active" role="tabpanel" aria-labelledby="tab-upload">
+          <div class="upload-zone" id="uploadZone" role="button" tabindex="0" aria-label="Upload area: click to select files or drag and drop photos and videos">
+            <input type="file" id="fileInput" accept="image/*,video/*" multiple aria-label="Select files to upload" class="file-input-hidden" />
+            <div class="upload-icon" aria-hidden="true">
+              <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="url(#uploadGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <polyline points="17 8 12 3 7 8" stroke="url(#uploadGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <line x1="12" y1="3" x2="12" y2="15" stroke="url(#uploadGrad)" stroke-width="2" stroke-linecap="round"/>
+                <defs>
+                  <linearGradient id="uploadGrad" x1="0" y1="0" x2="24" y2="24">
+                    <stop offset="0%" stop-color="#00d4ff"/>
+                    <stop offset="100%" stop-color="#7c3aed"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <h3>Drop files here or click to upload</h3>
+            <p>Supports JPG, PNG, WebP, MP4, MOV — up to 100MB</p>
+            <div class="upload-supported">
+              <span class="tag">Images</span>
+              <span class="tag">Videos</span>
+              <span class="tag">Screenshots</span>
+            </div>
+          </div>
+          <!-- Preview Area -->
+          <div class="file-preview-area" id="filePreviewArea" aria-live="polite" aria-label="Uploaded files preview"></div>
+          <!-- Upload Progress -->
+          <div class="upload-progress" id="uploadProgress" aria-hidden="true">
+            <div class="progress-header">
+              <span>Uploading & Analyzing...</span>
+              <span id="progressPct">0%</span>
+            </div>
+            <div class="progress-bar-outer" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Upload progress">
+              <div class="progress-bar-inner" id="progressBar"></div>
+            </div>
+            <div class="progress-steps" id="progressSteps">
+              <div class="pstep active" id="pstep1">
+                <div class="pstep-dot"></div>
+                <span>Uploading to Cloud Storage</span>
+              </div>
+              <div class="pstep" id="pstep2">
+                <div class="pstep-dot"></div>
+                <span>Gemini Vision Analysis</span>
+              </div>
+              <div class="pstep" id="pstep3">
+                <div class="pstep-dot"></div>
+                <span>Live Traffic Verification</span>
+              </div>
+              <div class="pstep" id="pstep4">
+                <div class="pstep-dot"></div>
+                <span>Generating Structured Output</span>
+              </div>
+              <div class="pstep" id="pstep5">
+                <div class="pstep-dot"></div>
+                <span>Triggering Action Flow</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Voice Panel -->
+        <div id="voicePanel" class="tab-panel" role="tabpanel" aria-labelledby="tab-voice" hidden>
+          <div class="voice-area">
+            <div class="voice-visualizer" id="voiceVisualizer" aria-hidden="true">
+              <div class="voice-rings">
+                <div class="voice-ring ring1"></div>
+                <div class="voice-ring ring2"></div>
+                <div class="voice-ring ring3"></div>
+              </div>
+              <button id="voiceBtn" class="voice-record-btn" aria-label="Start voice recording" aria-pressed="false">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" fill="currentColor"/>
+                  <path d="M19 10v2a7 7 0 01-14 0v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M12 19v4M8 23h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <div class="voice-status" id="voiceStatus">
+              <p class="voice-status-text" id="voiceStatusText">Press the mic to start recording</p>
+              <p class="voice-timer" id="voiceTimer" aria-live="polite" aria-atomic="true">0:00</p>
+            </div>
+            <div class="transcription-area" id="transcriptionArea" aria-live="polite" aria-label="Voice transcription">
+              <div class="transcription-header">
+                <span>Live Transcription</span>
+                <div class="transcription-indicator" id="transcriptionIndicator" aria-hidden="true"></div>
+              </div>
+              <div class="transcription-text" id="transcriptionText" role="log" aria-label="Transcribed text">
+                Speak clearly and describe what you see. Include location if possible.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Text Panel -->
+        <div id="textPanel" class="tab-panel" role="tabpanel" aria-labelledby="tab-text" hidden>
+          <div class="text-area-wrapper">
+            <label for="textReport" class="form-label">Describe the incident</label>
+            <textarea
+              id="textReport"
+              class="text-report-input"
+              rows="6"
+              placeholder="Example: There's a major accident on Highway 1 near the bridge. Two cars collided. There's debris on the road and traffic is backed up for about 2km..."
+              maxlength="2000"
+              aria-describedby="textReportHint textCharCount"
+            ></textarea>
+            <div class="textarea-footer">
+              <span id="textReportHint" class="form-hint">Be as specific as possible — include location, what you see, and how severe the incident is.</span>
+              <span id="textCharCount" class="char-count" aria-live="polite" aria-atomic="true">0 / 2000</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Common Location Field -->
+        <div class="location-section" aria-labelledby="location-heading">
+          <h3 id="location-heading" class="section-label">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="#00d4ff" stroke-width="2"/>
+              <circle cx="12" cy="9" r="2.5" stroke="#00d4ff" stroke-width="2"/>
+            </svg>
+            Location
+          </h3>
+          <div class="location-options">
+            <button class="btn btn-secondary" id="geolocateBtn" aria-label="Use my current GPS location">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                <circle cx="12" cy="12" r="3" fill="currentColor"/>
+                <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              Use My Location
+            </button>
+            <span class="location-or" aria-hidden="true">or</span>
+            <input type="text" id="locationInput" class="location-input" placeholder="Enter address or landmark..." aria-label="Enter location manually" aria-describedby="locationHint" />
+          </div>
+          <span id="locationHint" class="form-hint">Location helps verify your report against live traffic data</span>
+          <div class="location-confirmed" id="locationConfirmed" aria-live="polite"></div>
+        </div>
+
+        <!-- Severity Self-Assessment -->
+        <div class="severity-select" aria-labelledby="severity-heading">
+          <h3 id="severity-heading" class="section-label">Your Assessment</h3>
+          <div class="severity-options" role="radiogroup" aria-labelledby="severity-heading">
+            <label class="severity-option" for="sev-low">
+              <input type="radio" id="sev-low" name="severity" value="low" aria-label="Low severity" />
+              <div class="severity-badge low">Low</div>
+              <span>Minor slowdown</span>
+            </label>
+            <label class="severity-option" for="sev-med">
+              <input type="radio" id="sev-med" name="severity" value="medium" aria-label="Medium severity" checked />
+              <div class="severity-badge medium">Medium</div>
+              <span>Significant impact</span>
+            </label>
+            <label class="severity-option" for="sev-high">
+              <input type="radio" id="sev-high" name="severity" value="high" aria-label="High severity" />
+              <div class="severity-badge high">High</div>
+              <span>Accident / injury</span>
+            </label>
+            <label class="severity-option" for="sev-crit">
+              <input type="radio" id="sev-crit" name="severity" value="critical" aria-label="Critical severity" />
+              <div class="severity-badge critical">Critical</div>
+              <span>Emergency / fatality</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button class="btn btn-primary btn-large btn-submit" id="submitBtn" aria-label="Submit incident report for AI analysis" disabled>
+          <span id="submitBtnText">Add Input to Submit</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </section>
+
+      <!-- Right: Analysis Panel -->
+      <aside class="analysis-panel" aria-labelledby="analysis-heading" aria-live="polite">
+        <div class="panel-header">
+          <h2 id="analysis-heading">AI Analysis</h2>
+          <div class="panel-status" id="panelStatus">
+            <span class="status-dot idle" aria-hidden="true"></span>
+            <span id="panelStatusText">Waiting for input</span>
+          </div>
+        </div>
+
+        <!-- Waiting State -->
+        <div class="analysis-placeholder" id="analysisPlaceholder">
+          <div class="placeholder-icon" aria-hidden="true">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="#1e293b" stroke-width="2"/>
+              <path d="M12 8v4l3 3" stroke="#334155" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <p>Submit an incident report to see real-time AI analysis results here.</p>
+          <div class="placeholder-steps">
+            <div class="placeholder-step">
+              <div class="p-step-dot" aria-hidden="true"></div>
+              <span>Gemini multimodal analysis</span>
+            </div>
+            <div class="placeholder-step">
+              <div class="p-step-dot" aria-hidden="true"></div>
+              <span>Live traffic verification</span>
+            </div>
+            <div class="placeholder-step">
+              <div class="p-step-dot" aria-hidden="true"></div>
+              <span>Structured JSON output</span>
+            </div>
+            <div class="placeholder-step">
+              <div class="p-step-dot" aria-hidden="true"></div>
+              <span>Action flow trigger</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Analysis State -->
+        <div class="analysis-active" id="analysisActive" hidden>
+          <div class="ai-processing">
+            <div class="ai-brain" aria-hidden="true">
+              <div class="brain-pulse"></div>
+              <div class="brain-pulse pulse2"></div>
+              <div class="brain-pulse pulse3"></div>
+              <div class="brain-icon">🧠</div>
+            </div>
+            <div class="ai-steps" id="aiSteps" role="log" aria-label="AI processing steps" aria-live="polite">
+              <!-- Animated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Results State -->
+        <div class="analysis-results" id="analysisResults" hidden aria-label="Analysis results">
+          <!-- Confidence Score -->
+          <div class="result-section">
+            <div class="confidence-display">
+              <div class="confidence-ring-outer" aria-hidden="true">
+                <svg class="confidence-ring" viewBox="0 0 100 100" width="120" height="120">
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="#1e293b" stroke-width="8"/>
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="url(#confGrad)" stroke-width="8"
+                    stroke-dasharray="251" stroke-dashoffset="251" id="confCircle"
+                    stroke-linecap="round" transform="rotate(-90 50 50)"/>
+                  <defs>
+                    <linearGradient id="confGrad" x1="0" y1="0" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#00d4ff"/>
+                      <stop offset="100%" stop-color="#00ff88"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div class="confidence-value" id="confValue">0%</div>
+              </div>
+              <div class="confidence-info">
+                <div class="result-label">AI Confidence</div>
+                <div class="result-tags" id="resultTags">
+                  <!-- Tags populated by JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Incident Details -->
+          <div class="result-section">
+            <h3 class="result-section-title">Incident Classification</h3>
+            <div class="incident-details" id="incidentDetails">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Actions Taken -->
+          <div class="result-section">
+            <h3 class="result-section-title">Actions Triggered</h3>
+            <div class="actions-list" id="actionsList">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Structured JSON Output -->
+          <div class="result-section">
+            <div class="json-header">
+              <h3 class="result-section-title">Structured Output</h3>
+              <button class="btn-copy" id="copyJsonBtn" aria-label="Copy JSON output to clipboard">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2"/>
+                  <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Copy JSON
+              </button>
+            </div>
+            <pre class="json-output" id="jsonOutput"><code id="jsonCode"></code></pre>
+          </div>
+
+          <!-- Authority Alert Badge -->
+          <div class="authority-alert" id="authorityAlert" hidden>
+            <div class="alert-icon" aria-hidden="true">🚨</div>
+            <div class="alert-content">
+              <strong>Authorities Notified</strong>
+              <p>Emergency services have been alerted due to high severity/confidence threshold.</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script src="js/report.js"></script>
+</body>
+</html>

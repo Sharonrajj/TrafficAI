@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Live traffic incident map with AI-detected incidents, rerouting suggestions, and real-time updates." />
+  <title>Live Map – TrafficAI</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/map.css" />
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo" aria-label="TrafficAI Home">
+        <div class="logo-icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="15" stroke="url(#logoGradM)" stroke-width="2"/>
+            <path d="M8 22L16 8L24 22" stroke="url(#logoGradM)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="16" cy="19" r="2" fill="#00d4ff"/>
+            <defs><linearGradient id="logoGradM" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#00d4ff"/><stop offset="100%" stop-color="#ff6b35"/></linearGradient></defs>
+          </svg>
+        </div>
+        <span class="logo-text">Traffic<span class="logo-accent">AI</span></span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navMenu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-menu" id="navMenu" role="list">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="report.html" class="nav-link">Report Incident</a></li>
+        <li><a href="map.html" class="nav-link active" aria-current="page">Live Map</a></li>
+        <li><a href="history.html" class="nav-link">History</a></li>
+        <li><a href="dashboard.html" class="nav-link nav-admin">Authority Dashboard</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main id="main-content" class="map-main">
+    <div class="map-layout">
+
+      <!-- Map Controls Sidebar -->
+      <aside class="map-sidebar" aria-label="Map controls and incident list">
+        <div class="sidebar-header">
+          <h1>Live Incidents</h1>
+          <div class="live-indicator">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span aria-live="polite" aria-atomic="true" id="liveCount">Loading...</span>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="map-filters" aria-label="Filter incidents">
+          <div class="filter-group" role="group" aria-labelledby="filter-severity-label">
+            <span id="filter-severity-label" class="filter-label">Severity</span>
+            <div class="filter-chips">
+              <button class="chip active" data-filter="all" aria-pressed="true">All</button>
+              <button class="chip" data-filter="critical" aria-pressed="false">Critical</button>
+              <button class="chip" data-filter="high" aria-pressed="false">High</button>
+              <button class="chip" data-filter="medium" aria-pressed="false">Medium</button>
+              <button class="chip" data-filter="low" aria-pressed="false">Low</button>
+            </div>
+          </div>
+          <div class="filter-group" role="group" aria-labelledby="filter-type-label">
+            <span id="filter-type-label" class="filter-label">Type</span>
+            <div class="filter-chips">
+              <button class="chip active" data-type="all" aria-pressed="true">All</button>
+              <button class="chip" data-type="accident" aria-pressed="false">Accident</button>
+              <button class="chip" data-type="congestion" aria-pressed="false">Congestion</button>
+              <button class="chip" data-type="emergency" aria-pressed="false">Emergency</button>
+              <button class="chip" data-type="hazard" aria-pressed="false">Hazard</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Incident List -->
+        <div class="incident-list" id="incidentList" role="list" aria-label="Incident list" aria-live="polite">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="map-quick-stats" aria-label="Map statistics">
+          <div class="qstat">
+            <span class="qstat-num" id="totalCount">0</span>
+            <span class="qstat-label">Total Active</span>
+          </div>
+          <div class="qstat">
+            <span class="qstat-num critical-text" id="criticalCount">0</span>
+            <span class="qstat-label">Critical</span>
+          </div>
+          <div class="qstat">
+            <span class="qstat-num" id="resolvedCount">0</span>
+            <span class="qstat-label">Resolved Today</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Map Area -->
+      <div class="map-area" aria-label="Interactive traffic map">
+        <!-- Map Container (Google Maps will render here) -->
+        <div id="mapContainer" class="map-container" aria-label="Traffic incident map" role="application">
+          <!-- Simulated Map (JS-driven, replaces with Google Maps API when key present) -->
+          <canvas id="mapCanvas" aria-hidden="true"></canvas>
+          <div class="map-overlay-info" id="mapOverlayInfo" aria-hidden="true"></div>
+        </div>
+
+        <!-- Map Controls -->
+        <div class="map-controls" aria-label="Map view controls">
+          <button class="map-ctrl-btn" id="zoomIn" aria-label="Zoom in">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+          </button>
+          <button class="map-ctrl-btn" id="zoomOut" aria-label="Zoom out">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+          </button>
+          <button class="map-ctrl-btn" id="myLocation" aria-label="Center map on my location">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+          <button class="map-ctrl-btn" id="refreshMap" aria-label="Refresh map data">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+
+        <!-- Map Legend -->
+        <div class="map-legend" role="legend" aria-label="Map legend">
+          <div class="legend-title">Legend</div>
+          <div class="legend-items">
+            <div class="legend-item"><div class="legend-dot critical" aria-hidden="true"></div><span>Critical</span></div>
+            <div class="legend-item"><div class="legend-dot high" aria-hidden="true"></div><span>High</span></div>
+            <div class="legend-item"><div class="legend-dot medium" aria-hidden="true"></div><span>Medium</span></div>
+            <div class="legend-item"><div class="legend-dot reroute" aria-hidden="true"></div><span>Reroute</span></div>
+          </div>
+        </div>
+
+        <!-- Selected Incident Detail Popup -->
+        <div class="incident-popup" id="incidentPopup" hidden role="dialog" aria-modal="false" aria-label="Incident details">
+          <button class="popup-close" id="popupClose" aria-label="Close incident details">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+          <div class="popup-content" id="popupContent">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script src="js/map.js"></script>
+</body>
+</html>

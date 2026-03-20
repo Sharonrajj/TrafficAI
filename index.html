@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Traffic Chaos → Real-Time Intervention AI: Transform chaotic citizen reports into verified, life-saving traffic interventions using Google Gemini and Cloud AI." />
+  <meta name="keywords" content="traffic AI, real-time intervention, Gemini, Google Cloud, smart city, traffic management" />
+  <meta property="og:title" content="TrafficAI – Real-Time Intervention System" />
+  <meta property="og:description" content="Transform messy human input into verified, life-saving traffic actions using Google Gemini AI." />
+  <title>TrafficAI – Real-Time Intervention System</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/landing.css" />
+</head>
+<body>
+  <!-- Skip to main content for accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Navigation -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo" aria-label="TrafficAI Home">
+        <div class="logo-icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="15" stroke="url(#logoGrad)" stroke-width="2"/>
+            <path d="M8 22L16 8L24 22" stroke="url(#logoGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="16" cy="19" r="2" fill="#00d4ff"/>
+            <defs>
+              <linearGradient id="logoGrad" x1="0" y1="0" x2="32" y2="32">
+                <stop offset="0%" stop-color="#00d4ff"/>
+                <stop offset="100%" stop-color="#ff6b35"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="logo-text">Traffic<span class="logo-accent">AI</span></span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navMenu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-menu" id="navMenu" role="list">
+        <li><a href="index.html" class="nav-link active" aria-current="page">Home</a></li>
+        <li><a href="report.html" class="nav-link">Report Incident</a></li>
+        <li><a href="map.html" class="nav-link">Live Map</a></li>
+        <li><a href="history.html" class="nav-link">History</a></li>
+        <li><a href="dashboard.html" class="nav-link nav-admin">Authority Dashboard</a></li>
+      </ul>
+      <a href="report.html" class="btn btn-primary nav-cta" aria-label="Report a traffic incident">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        Report Now
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main id="main-content">
+
+    <!-- Hero Section -->
+    <section class="hero" aria-labelledby="hero-heading">
+      <div class="hero-bg-grid" aria-hidden="true"></div>
+      <div class="hero-particles" id="heroParticles" aria-hidden="true"></div>
+      <div class="hero-container">
+        <div class="hero-badge" aria-label="Status: Live System Operational">
+          <span class="badge-dot" aria-hidden="true"></span>
+          <span>Live System Operational</span>
+        </div>
+        <h1 id="hero-heading" class="hero-title">
+          Traffic Chaos
+          <span class="hero-arrow" aria-hidden="true">→</span>
+          <span class="hero-highlight">Real-Time<br/>Intervention AI</span>
+        </h1>
+        <p class="hero-subtitle">
+          Transform messy citizen reports — photos, videos, voice, and text — into verified, structured, life-saving traffic interventions. Powered by <strong>Google Gemini</strong> and built on <strong>Google Cloud</strong>.
+        </p>
+        <div class="hero-stats" aria-label="System statistics">
+          <div class="stat-item">
+            <span class="stat-number" data-target="2847" aria-label="2847 incidents analyzed">0</span>
+            <span class="stat-label">Incidents Analyzed</span>
+          </div>
+          <div class="stat-divider" aria-hidden="true"></div>
+          <div class="stat-item">
+            <span class="stat-number" data-target="98" aria-label="98 percent accuracy">0</span>
+            <span class="stat-label">% AI Accuracy</span>
+          </div>
+          <div class="stat-divider" aria-hidden="true"></div>
+          <div class="stat-item">
+            <span class="stat-number" data-target="4" aria-label="Average 4 seconds response">0</span>
+            <span class="stat-label">Sec Avg Response</span>
+          </div>
+          <div class="stat-divider" aria-hidden="true"></div>
+          <div class="stat-item">
+            <span class="stat-number" data-target="312" aria-label="312 authorities alerted">0</span>
+            <span class="stat-label">Authorities Alerted</span>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <a href="report.html" class="btn btn-primary btn-large" aria-label="Report a traffic incident now">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+              <path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+            Report Incident
+          </a>
+          <a href="map.html" class="btn btn-secondary btn-large" aria-label="View live traffic map">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Live Map
+          </a>
+        </div>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-dashboard-preview">
+          <div class="preview-header">
+            <span class="preview-dot red"></span>
+            <span class="preview-dot yellow"></span>
+            <span class="preview-dot green"></span>
+            <span class="preview-title">AI Analysis Engine</span>
+          </div>
+          <div class="preview-content">
+            <div class="preview-input-area">
+              <div class="preview-icon">📸</div>
+              <div class="preview-text">Analyzing traffic photo...</div>
+              <div class="preview-bar">
+                <div class="preview-bar-fill" id="previewBar"></div>
+              </div>
+            </div>
+            <div class="preview-output">
+              <div class="preview-tag severity-high">SEVERITY: HIGH</div>
+              <div class="preview-tag confidence">CONFIDENCE: 94%</div>
+              <div class="preview-tag incident">ACCIDENT DETECTED</div>
+              <div class="preview-json">
+                <pre><code>{
+  "type": "collision",
+  "severity": "high",
+  "confidence": 0.94,
+  "location": "detected",
+  "action": "alert_authorities"
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-scroll" aria-hidden="true">
+        <span>Scroll to explore</span>
+        <div class="scroll-arrow"></div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works" aria-labelledby="how-heading">
+      <div class="section-container">
+        <div class="section-header">
+          <div class="section-badge">Process Flow</div>
+          <h2 id="how-heading">How It Works</h2>
+          <p>Seven intelligent steps from chaotic input to life-saving action</p>
+        </div>
+        <div class="flow-steps" role="list" aria-label="Process steps">
+          <div class="flow-step" role="listitem">
+            <div class="step-number" aria-hidden="true">01</div>
+            <div class="step-icon" aria-hidden="true">📤</div>
+            <h3>Submit Input</h3>
+            <p>Upload photos, videos, record voice, or type a quick report from any device.</p>
+          </div>
+          <div class="flow-connector" aria-hidden="true"></div>
+          <div class="flow-step" role="listitem">
+            <div class="step-number" aria-hidden="true">02</div>
+            <div class="step-icon" aria-hidden="true">🧠</div>
+            <h3>Gemini Analysis</h3>
+            <p>Google Gemini multimodal AI analyzes all input types simultaneously for context.</p>
+          </div>
+          <div class="flow-connector" aria-hidden="true"></div>
+          <div class="flow-step" role="listitem">
+            <div class="step-number" aria-hidden="true">03</div>
+            <div class="step-icon" aria-hidden="true">🔍</div>
+            <h3>Extract & Classify</h3>
+            <p>Incident type, location, severity, confidence score, and urgency are extracted.</p>
+          </div>
+          <div class="flow-connector" aria-hidden="true"></div>
+          <div class="flow-step" role="listitem">
+            <div class="step-number" aria-hidden="true">04</div>
+            <div class="step-icon" aria-hidden="true">✅</div>
+            <h3>Live Verification</h3>
+            <p>Cross-referenced with real-time Google Maps traffic and weather data.</p>
+          </div>
+          <div class="flow-connector" aria-hidden="true"></div>
+          <div class="flow-step" role="listitem">
+            <div class="step-number" aria-hidden="true">05</div>
+            <div class="step-icon" aria-hidden="true">⚡</div>
+            <h3>Action Triggered</h3>
+            <p>Smart signals adjusted, reroutes suggested, emergency alerts dispatched.</p>
+          </div>
+          <div class="flow-connector" aria-hidden="true"></div>
+          <div class="flow-step" role="listitem">
+            <div class="step-number" aria-hidden="true">06</div>
+            <div class="step-icon" aria-hidden="true">📡</div>
+            <h3>Authorities Notified</h3>
+            <p>High-severity incidents instantly escalate to emergency responders.</p>
+          </div>
+          <div class="flow-connector" aria-hidden="true"></div>
+          <div class="flow-step" role="listitem">
+            <div class="step-number" aria-hidden="true">07</div>
+            <div class="step-icon" aria-hidden="true">📊</div>
+            <h3>Verified Output</h3>
+            <p>Structured, accessible results displayed and logged for continuous learning.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" aria-labelledby="features-heading">
+      <div class="section-container">
+        <div class="section-header">
+          <div class="section-badge">Capabilities</div>
+          <h2 id="features-heading">Built for Real Emergencies</h2>
+          <p>Every feature designed to work when it matters most</p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card feature-card--large">
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                <rect x="2" y="3" width="20" height="14" rx="2" stroke="#00d4ff" stroke-width="2"/>
+                <path d="M8 21h8M12 17v4" stroke="#00d4ff" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="12" cy="10" r="3" stroke="#00d4ff" stroke-width="2"/>
+                <path d="M7 10h1M16 10h1" stroke="#ff6b35" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Multimodal AI Understanding</h3>
+            <p>Google Gemini processes photos, videos, voice recordings, and text simultaneously — extracting meaning even from blurry images or noisy audio.</p>
+            <div class="feature-tags">
+              <span class="tag">Images</span>
+              <span class="tag">Video</span>
+              <span class="tag">Voice</span>
+              <span class="tag">Text</span>
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="#ff6b35" stroke-width="2"/>
+                <path d="M12 8v4l3 3" stroke="#ff6b35" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Real-Time Verification</h3>
+            <p>Every report is cross-checked against live Google Maps traffic data and weather conditions before any action is taken.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="#a855f7" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="#a855f7" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h3>Smart Signal Control</h3>
+            <p>Generates actionable traffic signal adjustment recommendations with timing changes for emergency vehicle passage.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.5 13.5 19.79 19.79 0 011.42 5a2 2 0 011.99-2H6.4a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L7.91 11a16 16 0 006.09 6.09l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" stroke="#00ff88" stroke-width="2"/>
+              </svg>
+            </div>
+            <h3>Emergency Escalation</h3>
+            <p>Confidence-based escalation engine auto-alerts police, fire, and medical services when severity thresholds are met.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="#00d4ff" stroke-width="2"/>
+                <circle cx="12" cy="9" r="2.5" stroke="#00d4ff" stroke-width="2"/>
+              </svg>
+            </div>
+            <h3>Live Map Routing</h3>
+            <p>Interactive map shows incident locations with alternative route suggestions updated in real-time as conditions change.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#ff6b35" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M9 12l2 2 4-4" stroke="#ff6b35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h3>Duplicate Detection</h3>
+            <p>Smart deduplication prevents alert fatigue by clustering reports about the same incident within a geographic and time window.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tech Stack Section -->
+    <section class="tech-stack" aria-labelledby="tech-heading">
+      <div class="section-container">
+        <div class="section-header">
+          <div class="section-badge">Powered By</div>
+          <h2 id="tech-heading">Google Cloud Ecosystem</h2>
+          <p>Enterprise-grade infrastructure built for scale and reliability</p>
+        </div>
+        <div class="tech-grid" role="list" aria-label="Technology stack">
+          <div class="tech-item" role="listitem">
+            <div class="tech-logo gemini" aria-label="Google Gemini">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2z" fill="url(#g1)"/><defs><linearGradient id="g1" x1="0" y1="0" x2="24" y2="24"><stop offset="0%" stop-color="#4285f4"/><stop offset="100%" stop-color="#34a853"/></linearGradient></defs></svg>
+            </div>
+            <span>Gemini AI</span>
+          </div>
+          <div class="tech-item" role="listitem">
+            <div class="tech-logo cloud-run" aria-label="Google Cloud Run">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" fill="url(#g2)"/><defs><linearGradient id="g2" x1="0" y1="0" x2="24" y2="24"><stop offset="0%" stop-color="#4285f4"/><stop offset="100%" stop-color="#1a73e8"/></linearGradient></defs></svg>
+            </div>
+            <span>Cloud Run</span>
+          </div>
+          <div class="tech-item" role="listitem">
+            <div class="tech-logo firestore" aria-label="Firebase Firestore">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M4 20L12 4l8 16H4z" fill="url(#g3)"/><defs><linearGradient id="g3" x1="0" y1="4" x2="0" y2="20"><stop offset="0%" stop-color="#ff6d00"/><stop offset="100%" stop-color="#ffc107"/></linearGradient></defs></svg>
+            </div>
+            <span>Firestore</span>
+          </div>
+          <div class="tech-item" role="listitem">
+            <div class="tech-logo pubsub" aria-label="Google Cloud Pub/Sub">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" fill="#34a853"/><circle cx="4" cy="8" r="2" fill="#4285f4"/><circle cx="20" cy="8" r="2" fill="#4285f4"/><circle cx="4" cy="16" r="2" fill="#ea4335"/><circle cx="20" cy="16" r="2" fill="#ea4335"/><path d="M6 8.5L9 11M15 11l3-2.5M6 15.5L9 13M15 13l3 2.5" stroke="#999" stroke-width="1.5"/></svg>
+            </div>
+            <span>Pub/Sub</span>
+          </div>
+          <div class="tech-item" role="listitem">
+            <div class="tech-logo bigquery" aria-label="Google BigQuery">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" fill="url(#g4)"/><circle cx="12" cy="12" r="4" stroke="white" stroke-width="1.5" fill="none"/><path d="M15 15l3 3" stroke="white" stroke-width="2" stroke-linecap="round"/><defs><linearGradient id="g4" x1="0" y1="0" x2="24" y2="24"><stop offset="0%" stop-color="#4285f4"/><stop offset="100%" stop-color="#0d47a1"/></linearGradient></defs></svg>
+            </div>
+            <span>BigQuery</span>
+          </div>
+          <div class="tech-item" role="listitem">
+            <div class="tech-logo maps" aria-label="Google Maps Platform">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="url(#g5)"/><circle cx="12" cy="9" r="2.5" fill="white"/><defs><linearGradient id="g5" x1="0" y1="2" x2="0" y2="22"><stop offset="0%" stop-color="#ea4335"/><stop offset="100%" stop-color="#c62828"/></linearGradient></defs></svg>
+            </div>
+            <span>Maps Platform</span>
+          </div>
+          <div class="tech-item" role="listitem">
+            <div class="tech-logo storage" aria-label="Google Cloud Storage">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="12" rx="2" fill="url(#g6)"/><path d="M8 10h8M8 14h5" stroke="white" stroke-width="1.5" stroke-linecap="round"/><defs><linearGradient id="g6" x1="0" y1="0" x2="20" y2="12"><stop offset="0%" stop-color="#34a853"/><stop offset="100%" stop-color="#1b5e20"/></linearGradient></defs></svg>
+            </div>
+            <span>Cloud Storage</span>
+          </div>
+          <div class="tech-item" role="listitem">
+            <div class="tech-logo antigravity" aria-label="Google Antigravity">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="url(#g7)"/><path d="M12 6l1.5 5H18l-4 3 1.5 5L12 16l-3.5 3L10 14l-4-3h4.5L12 6z" fill="white"/><defs><linearGradient id="g7" x1="0" y1="0" x2="24" y2="24"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#4c1d95"/></linearGradient></defs></svg>
+            </div>
+            <span>Antigravity</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Live Stats Section -->
+    <section class="live-activity" aria-labelledby="activity-heading">
+      <div class="section-container">
+        <div class="section-header">
+          <div class="section-badge live-badge">
+            <span class="live-dot" aria-hidden="true"></span>
+            Live Activity
+          </div>
+          <h2 id="activity-heading">Recent Incidents</h2>
+          <p>Real-time feed of analyzed and resolved incidents</p>
+        </div>
+        <div class="activity-feed" id="activityFeed" aria-live="polite" aria-label="Live incident feed">
+          <!-- Populated by JavaScript -->
+        </div>
+        <div class="activity-footer">
+          <a href="history.html" class="btn btn-secondary" aria-label="View complete incident history">View All Incidents</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section" aria-labelledby="cta-heading">
+      <div class="section-container">
+        <div class="cta-card">
+          <div class="cta-glow" aria-hidden="true"></div>
+          <h2 id="cta-heading">See an Incident? Report It Now.</h2>
+          <p>Your report could save lives. It takes under 30 seconds to submit a photo, video, or voice message. Our AI does the rest.</p>
+          <div class="cta-actions">
+            <a href="report.html" class="btn btn-primary btn-large" aria-label="Report a traffic incident">
+              Report an Incident
+            </a>
+            <a href="dashboard.html" class="btn btn-outline btn-large" aria-label="Access authority dashboard">
+              Authority Access
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <circle cx="16" cy="16" r="15" stroke="url(#footerLogoGrad)" stroke-width="2"/>
+            <path d="M8 22L16 8L24 22" stroke="url(#footerLogoGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="16" cy="19" r="2" fill="#00d4ff"/>
+            <defs>
+              <linearGradient id="footerLogoGrad" x1="0" y1="0" x2="32" y2="32">
+                <stop offset="0%" stop-color="#00d4ff"/>
+                <stop offset="100%" stop-color="#ff6b35"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span>Traffic<span>AI</span></span>
+        </div>
+        <p>Transforming chaos into clarity. Real-time traffic intervention powered by Google Gemini AI.</p>
+      </div>
+      <div class="footer-links" role="navigation" aria-label="Footer navigation">
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <ul role="list">
+            <li><a href="report.html">Report Incident</a></li>
+            <li><a href="map.html">Live Map</a></li>
+            <li><a href="history.html">Incident History</a></li>
+            <li><a href="dashboard.html">Admin Dashboard</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Technology</h4>
+          <ul role="list">
+            <li><a href="#" aria-label="Learn about Gemini AI integration">Google Gemini AI</a></li>
+            <li><a href="#" aria-label="Learn about Cloud Run">Cloud Run</a></li>
+            <li><a href="#" aria-label="Learn about Firestore">Firestore</a></li>
+            <li><a href="#" aria-label="Learn about Google Antigravity">Antigravity</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul role="list">
+            <li><a href="docs/api.html" aria-label="API documentation">API Docs</a></li>
+            <li><a href="docs/architecture.html" aria-label="Architecture documentation">Architecture</a></li>
+            <li><a href="docs/security.html" aria-label="Security documentation">Security</a></li>
+            <li><a href="docs/testing.html" aria-label="Testing documentation">Testing Guide</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 TrafficAI. Built with Google Cloud &amp; Gemini AI for societal impact.</p>
+      <div class="footer-status" aria-label="System status">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span>All systems operational</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/landing.js"></script>
+</body>
+</html>

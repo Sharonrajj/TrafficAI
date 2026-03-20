@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Full incident history — browse all AI-analyzed traffic incidents, filter by date, type, and severity." />
+  <title>Incident History – TrafficAI</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/history.css" />
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo" aria-label="TrafficAI Home">
+        <div class="logo-icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="15" stroke="url(#logoGradH)" stroke-width="2"/>
+            <path d="M8 22L16 8L24 22" stroke="url(#logoGradH)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="16" cy="19" r="2" fill="#00d4ff"/>
+            <defs><linearGradient id="logoGradH" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#00d4ff"/><stop offset="100%" stop-color="#ff6b35"/></linearGradient></defs>
+          </svg>
+        </div>
+        <span class="logo-text">Traffic<span class="logo-accent">AI</span></span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="navMenu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-menu" id="navMenu" role="list">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="report.html" class="nav-link">Report Incident</a></li>
+        <li><a href="map.html" class="nav-link">Live Map</a></li>
+        <li><a href="history.html" class="nav-link active" aria-current="page">History</a></li>
+        <li><a href="dashboard.html" class="nav-link nav-admin">Authority Dashboard</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main id="main-content" class="history-main">
+    <div class="history-container">
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <div>
+          <h1>Incident History</h1>
+          <p>Browse all AI-analyzed traffic incidents. Filter, search, and review structured outputs.</p>
+        </div>
+        <a href="report.html" class="btn btn-primary" aria-label="Report a new incident">+ New Report</a>
+      </div>
+
+      <!-- Summary Stats Bar -->
+      <div class="stats-bar" aria-label="Incident statistics">
+        <div class="stat-card">
+          <div class="stat-icon" aria-hidden="true">📊</div>
+          <div class="stat-info">
+            <span class="stat-val" id="totalIncidents">2,847</span>
+            <span class="stat-lbl">Total Incidents</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" aria-hidden="true">✅</div>
+          <div class="stat-info">
+            <span class="stat-val" id="resolvedIncidents">2,614</span>
+            <span class="stat-lbl">Resolved</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" aria-hidden="true">⚡</div>
+          <div class="stat-info">
+            <span class="stat-val" id="avgResponseTime">4.2s</span>
+            <span class="stat-lbl">Avg AI Response</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" aria-hidden="true">🚨</div>
+          <div class="stat-info">
+            <span class="stat-val" id="alertsSent">312</span>
+            <span class="stat-lbl">Authority Alerts</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters & Search -->
+      <div class="history-controls" aria-label="Search and filter controls">
+        <div class="search-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="11" cy="11" r="8" stroke="#64748b" stroke-width="2"/>
+            <path d="M21 21l-4.35-4.35" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input type="search" id="searchInput" placeholder="Search by location, type, or ID..." aria-label="Search incidents" class="search-input" />
+        </div>
+        <div class="filter-row">
+          <label for="filterSeverity" class="sr-only">Filter by severity</label>
+          <select id="filterSeverity" class="filter-select" aria-label="Filter by severity">
+            <option value="all">All Severities</option>
+            <option value="critical">Critical</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+          <label for="filterType" class="sr-only">Filter by incident type</label>
+          <select id="filterType" class="filter-select" aria-label="Filter by type">
+            <option value="all">All Types</option>
+            <option value="accident">Accident</option>
+            <option value="congestion">Congestion</option>
+            <option value="emergency">Emergency</option>
+            <option value="hazard">Road Hazard</option>
+            <option value="vehicle">Stalled Vehicle</option>
+          </select>
+          <label for="filterStatus" class="sr-only">Filter by status</label>
+          <select id="filterStatus" class="filter-select" aria-label="Filter by status">
+            <option value="all">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="monitoring">Monitoring</option>
+            <option value="resolved">Resolved</option>
+          </select>
+          <label for="filterDate" class="sr-only">Filter by date range</label>
+          <select id="filterDate" class="filter-select" aria-label="Filter by date">
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="all">All Time</option>
+          </select>
+          <button class="btn btn-secondary" id="clearFilters" aria-label="Clear all filters">Clear Filters</button>
+        </div>
+      </div>
+
+      <!-- Results Count -->
+      <div class="results-header">
+        <span id="resultsCount" aria-live="polite" aria-atomic="true">Showing all incidents</span>
+        <div class="view-toggle" role="group" aria-label="View mode">
+          <button class="view-btn active" id="gridView" aria-pressed="true" aria-label="Grid view">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" stroke="currentColor" stroke-width="2" rx="1"/><rect x="14" y="3" width="7" height="7" stroke="currentColor" stroke-width="2" rx="1"/><rect x="3" y="14" width="7" height="7" stroke="currentColor" stroke-width="2" rx="1"/><rect x="14" y="14" width="7" height="7" stroke="currentColor" stroke-width="2" rx="1"/></svg>
+          </button>
+          <button class="view-btn" id="listView" aria-pressed="false" aria-label="List view">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6h11M9 12h11M9 18h11M5 6h.01M5 12h.01M5 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Incidents Grid/List -->
+      <div class="incidents-container grid-view" id="incidentsContainer" role="list" aria-label="Incident history list" aria-live="polite">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Load More -->
+      <div class="load-more-area" id="loadMoreArea">
+        <button class="btn btn-secondary" id="loadMoreBtn" aria-label="Load more incidents">
+          Load More Incidents
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 5v14M5 12l7 7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Incident Detail Modal -->
+    <div class="modal-overlay" id="modalOverlay" hidden role="dialog" aria-modal="true" aria-label="Incident detail">
+      <div class="modal-content" id="modalContent">
+        <button class="modal-close" id="modalClose" aria-label="Close incident details">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+        <div class="modal-body" id="modalBody">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script src="js/history.js"></script>
+</body>
+</html>

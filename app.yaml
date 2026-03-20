@@ -1,0 +1,25 @@
+runtime: python311
+entrypoint: python main.py
+# This configuration tells Google App Engine to serve our static files directly.
+handlers:
+# Serve index.html for the root url
+- url: /
+  static_files: index.html
+  upload: index.html
+
+# Serve the CSS directory
+- url: /css
+  static_dir: css
+
+# Serve the JS directory
+- url: /js
+  static_dir: js
+
+# Serve the assets directory
+- url: /assets
+  static_dir: assets
+
+# Serve any other html files in the root folder
+- url: /(.*\.html)
+  static_files: \1
+  upload: .*\.html
