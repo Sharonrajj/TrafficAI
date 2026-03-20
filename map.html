@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Live traffic incident map with AI-detected incidents, rerouting suggestions, and real-time updates." />
+  <meta name="description"
+    content="Live traffic incident map with AI-detected incidents, rerouting suggestions, and real-time updates." />
   <title>Live Map – TrafficAI</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/map.css" />
 </head>
+
 <body>
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
@@ -19,15 +24,22 @@
       <a href="index.html" class="nav-logo" aria-label="TrafficAI Home">
         <div class="logo-icon" aria-hidden="true">
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-            <circle cx="16" cy="16" r="15" stroke="url(#logoGradM)" stroke-width="2"/>
-            <path d="M8 22L16 8L24 22" stroke="url(#logoGradM)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="16" cy="19" r="2" fill="#00d4ff"/>
-            <defs><linearGradient id="logoGradM" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#00d4ff"/><stop offset="100%" stop-color="#ff6b35"/></linearGradient></defs>
+            <circle cx="16" cy="16" r="15" stroke="url(#logoGradM)" stroke-width="2" />
+            <path d="M8 22L16 8L24 22" stroke="url(#logoGradM)" stroke-width="2.5" stroke-linecap="round"
+              stroke-linejoin="round" />
+            <circle cx="16" cy="19" r="2" fill="#00d4ff" />
+            <defs>
+              <linearGradient id="logoGradM" x1="0" y1="0" x2="32" y2="32">
+                <stop offset="0%" stop-color="#00d4ff" />
+                <stop offset="100%" stop-color="#ff6b35" />
+              </linearGradient>
+            </defs>
           </svg>
         </div>
         <span class="logo-text">Traffic<span class="logo-accent">AI</span></span>
       </a>
-      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navMenu">
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false"
+        aria-controls="navMenu">
         <span></span><span></span><span></span>
       </button>
       <ul class="nav-menu" id="navMenu" role="list">
@@ -111,16 +123,29 @@
         <!-- Map Controls -->
         <div class="map-controls" aria-label="Map view controls">
           <button class="map-ctrl-btn" id="zoomIn" aria-label="Zoom in">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
           </button>
           <button class="map-ctrl-btn" id="zoomOut" aria-label="Zoom out">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
           </button>
           <button class="map-ctrl-btn" id="myLocation" aria-label="Center map on my location">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+              <circle cx="12" cy="12" r="3" fill="currentColor" />
+              <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
           </button>
           <button class="map-ctrl-btn" id="refreshMap" aria-label="Refresh map data">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+              <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" />
+            </svg>
           </button>
         </div>
 
@@ -128,17 +153,28 @@
         <div class="map-legend" role="legend" aria-label="Map legend">
           <div class="legend-title">Legend</div>
           <div class="legend-items">
-            <div class="legend-item"><div class="legend-dot critical" aria-hidden="true"></div><span>Critical</span></div>
-            <div class="legend-item"><div class="legend-dot high" aria-hidden="true"></div><span>High</span></div>
-            <div class="legend-item"><div class="legend-dot medium" aria-hidden="true"></div><span>Medium</span></div>
-            <div class="legend-item"><div class="legend-dot reroute" aria-hidden="true"></div><span>Reroute</span></div>
+            <div class="legend-item">
+              <div class="legend-dot critical" aria-hidden="true"></div><span>Critical</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot high" aria-hidden="true"></div><span>High</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot medium" aria-hidden="true"></div><span>Medium</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot reroute" aria-hidden="true"></div><span>Reroute</span>
+            </div>
           </div>
         </div>
 
         <!-- Selected Incident Detail Popup -->
-        <div class="incident-popup" id="incidentPopup" hidden role="dialog" aria-modal="false" aria-label="Incident details">
+        <div class="incident-popup" id="incidentPopup" hidden role="dialog" aria-modal="false"
+          aria-label="Incident details">
           <button class="popup-close" id="popupClose" aria-label="Close incident details">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
           </button>
           <div class="popup-content" id="popupContent">
             <!-- Populated by JS -->
@@ -163,13 +199,14 @@
     ╚══════════════════════════════════════════════════════════════╝
   -->
   <script
-    src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initTrafficMap&libraries=maps,marker&v=beta"
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAYd7B7UB0Zxi2E5w33eTZjUL9XghonmHo&callback=initTrafficMap&libraries=maps,marker&v=beta"
     async defer>
   </script>
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {});
+      navigator.serviceWorker.register('/sw.js').catch(() => { });
     }
   </script>
 </body>
+
 </html>
